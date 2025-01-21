@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>さらに多くのピンを表示</title>
+        <!-- LeafletのCSS読み込み -->
+        <link
+            rel="stylesheet"
+            href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+            integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY="
+            crossorigin=""
+        />
+        
+        <!-- LeafletのJavaScript読み込み -->
+        <script
+            src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
+            integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo="
+            crossorigin=""
+        ></script>
+
+        <!-- Leaflet.markerclusterを読み込み -->
+        <script src="https://unpkg.com/leaflet.markercluster@1.4.1/dist/leaflet.markercluster.js"></script>
+        <link
+            rel="stylesheet"
+            href="https://unpkg.com/leaflet.markercluster@1.4.1/dist/MarkerCluster.css"
+        />
+        <link
+            rel="stylesheet"
+            href="https://unpkg.com/leaflet.markercluster@1.4.1/dist/MarkerCluster.Default.css"
+        />
+    </head>
+    <body>
+        <!-- 地図を表示するdiv要素を宣言 -->
+         <div id="map" style="height: 80vh;"></div>
+         <script>
+            // 地図インスタンスを初期化（=div要素に地図画面が埋め込まれる）
+            const map = L.map("map", {
+                center: [36.5, 137.1],  // 初期表示の地図中心の[緯度, 経度]
+                zoom: 5,  // 初期表示のズームレベル
+            });
+            
+            // 背景レイヤーインスタンスを初期化（openStreetmap）
+            const backgroundLayer = L.tileLayer(
+                'https://tile.openstreetmap.org/{z}/{x}/{y}.png',  // タイル画像のURL
+                {
+                    maxZoom: 19,  // 最大ズームレベル
+                    attribution: '&copy; <a href="https://www.openstreetmap.org/">OpenStreetMap</a> contributors',  // 著作権表示
+                }
+            );
+
+            // 地図インスタンスへレイヤーを追加
+            map.addLayer(backgroundLayer);
+            
+            fetch('./P29-23.geojson')  // 全国分の学校データ（5万件超）のGeoJSONを非同期読み込み
+                .then((res) => res.json())
+                .then((json) => {
+                    // クラスタリングレイヤーを作成し地図に追加
+                    const markers = L.markerClusterGroup()
+                        .bindPopup(
+                            (layer) => layer.feature.properties.P29_004,  // ポップアップで学校名を表示
+                        )
+                        .addTo(map);
+                    L.geoJSON(json).addTo(markers);  // クラスタリングレイヤーにGeoJSONデータをセット
+                });
+            
+            
+         </script>
+    </body>
+</html>
