@@ -29,6 +29,14 @@ const map = new maplibregl.Map({
                 attribution:
                     '&copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
             },
+            gsi_pale: {
+                type: 'raster',
+                tiles: ['https://cyberjapandata.gsi.go.jp/xyz/pale/{z}/{x}/{y}.png'],
+                maxzoom: 18,
+                tileSize: 256,
+                attribution:
+                    '&copy; <a href="https://maps.gsi.go.jp/development/ichiran.html">地理院タイル</a>',
+            },
             // 以降は重ねるハザードマップのソース
             hazard_flood: {
                 type: 'raster',
@@ -102,6 +110,11 @@ const map = new maplibregl.Map({
             {
                 id: 'osm-layers',
                 source: 'osm',
+                type: 'raster',
+            },
+            {
+                id: 'gsi_pale-layers',
+                source: 'gsi_pale',
                 type: 'raster',
             },
             // 以降は重ねるハザードマップのレイヤー
@@ -422,7 +435,17 @@ geolocationControl.on('geolocate', (e) => {
 
 // マップの初期ロード完了時に発火するイベントを定義
 map.on('load', () => {
-    // 背景地図・重ねるタイル地図のコントロール
+    // 背景地図の選択
+    const background = new OpacityControl({
+        baseLayers: {
+            'osm-layers': 'OpenStreetMap',
+            'gsi_pale-layers': '地理院地図 淡色地図',
+        },
+        opacityControl: true,
+    });
+    map.addControl(background, 'bottom-left');
+
+    // 重ねるタイル地図のコントロール
     const opacity = new OpacityControl({
         baseLayers: {
             'hazard_flood-layer': '洪水浸水想定区域',  // layer-id: レイヤー名
